@@ -1,0 +1,333 @@
+\documentclass[runningheads,a4paper]{llncs}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{CJK}
+\usepackage{color}
+
+\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
+\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+\noindent\keywordname\enspace\ignorespaces#1}
+
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{3}
+
+\begin{document}
+\begin{CJK*}{GBK}{song}
+\mainmatter  % start of an individual contribution
+
+% first the title is needed
+\title{Headlines Expansion for Chinese News Headline Categorization}
+
+% a short form should be given in case it is too long for the running head
+\titlerunning{Right Title}
+
+
+\author{Junfeng Tian %
+\and Maoquan Wang
+\and Weijie An
+\thanks{Equal Contribution.}}
+
+\authorrunning{Left Title}
+% (feature abused for this document to repeat the title also on left hand pages)
+
+% the affiliations are given next; don't give your e-mail address
+% unless you accept that it will be published
+\institute{East China Normal University\\
+\url{{51151201048, 51151201051, 51151201022}@stu.ecnu.edu.cn}
+}
+
+%
+% NB: a more complex sample for affiliations and the mapping to the
+% corresponding authors can be found in the file "llncs.dem"
+% (search for the string "\mainmatter" where a contribution starts).
+% "llncs.dem" accompanies the document class "llncs.cls".
+%
+
+%计算机科学讲座(演讲笔记)：作者指导
+%\toctitle{Lecture Notes in Computer Science}
+%\tocauthor{Authors' Instructions}
+%\tableofcontents
+
+\maketitle
+
+\begin{abstract}
+Finding that the Chinese News Headlines is extremely short, we proposed a headlines expansion based classification model which combine the traditional classifier and deep learning method for such a interest task. Experiments show that our model outperform the baseline with a large margin and obtain state-of-the-art performance on the released data in NLPCC shared task2 \cite{nlpcc2017task2}.
+
+\keywords{Chinese News Headlines classification, Expansion, Deep Learning}
+\end{abstract}
+
+\section{Introduction}
+
+Text classification is a foundational task in many NLP applications ~\cite{sriram2010short,aggarwal2012survey}. With the rise of Internet and social media, the text data on the web is growing exponentially. Chinese News Headlines classification is such a task that categorization of news titles into sub-categories for search engines, and classification of news articles by subject. It is impractical and extremely tedious to hand-label a sufficient number of headlines. What's more, in the case of non-obvious phenomenons, humans can not make the right judgments. While machine learning techniques suits perfectly for this kind of tasks.
+
+Various machine learning techniques especially deep learning methods has been widely used in text classification task. Kim~\cite{kim2014convolutional} introduced a convolution neural network for sentence classification, Lai \cite{lai2015recurrent} proposed Recurrent Convolutional Neural Networks(RCNN) to enhance contextual information of words, and Zhang~\cite{zhang2015character} explored character-level convolutional networks for text classification. These methods mainly focus on the labeled data, it is difficult to exploit the existing limited labeled data to achieve higher accuracy when face the unexplored instances. Chinese News headlines is very short and do not provide enough contextual information, the short-text classifier easily be blocked by sparsity and ambiguity problems~\cite{chen2011short}.
+
+%Finding that the Chinese news headline usually extremely short,
+We proposed a headline expansion based classification framework for such the special task. An effective way of news headlines classification is to use some extra knowledge to enrich news headlines~\cite{qiu1993concept}. Firstly, we use search engines to expand the headlines and get the expanded headlines which is directly combined with the origin headlines as the final classification instance. After that, we utilize both the traditional classification models and deep learning based method for the textural classification. Finally, we combine the result of traditional classification models and deep learning method to get the final prediction.
+
+We conduct experiments on the released Chinese News Headlines data. The results show that our expansion based classification methods much better than that non-extended.
+
+The rest of this paper is organized as below: Section \ref{sec:model} describe the detail of our model. Section \ref{sec:experiment} shows the experiments and Section \ref{sec:result} is the result analyses. Then we provided some case study in the Section \ref{sec:casestudy}. We conclude our work in the final Section \ref{sec:conclusion}.
+
+\section{Model Description}
+
+\label{sec:model}
+
+{\bf Fig. \ref{fig:overview}} shows the overall architecture of our system. Given the news headlines, we first expand the headlines with the titles searched from the Internet. After that, we build our system based on the expanded headlines, which consists of the following three modules:
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.75\columnwidth]{images/nlpcc_framework.eps}\\
+  \caption{The system architecture}\label{fig:overview}
+\end{figure}
+
+\begin{itemize}
+  \item {\bf Traditional NLP Module} is to extract two kinds of features. The lexical features are to select the category-related words, and the embedding features to capture the semantic information. All these NLP-based features are used to build classifier to make prediction.
+  \item {\bf Deep Learning Module} is to encode input sentences into fixed-length vector and adopt softmax function to predict the probability of each category.
+  \item {\bf Ensemble Module} is to average the probability of above two modules to get the final predicted category.
+\end{itemize}
+Next, we will describe the system in detail.
+
+
+\subsection{Headlines Expansion}
+\label{sec:expansion}
+
+The headlines of news are quite short and confused, and they need to be supplemented related knowledge to help reduce the ambiguity. We search on the largest Chinese search engine {\em Baidu.com} to obtain the top 5 related titles as the extra knowledge. We directly concatenate the origin headline and the expanded headlines as the input to the following models.
+
+
+\subsection{Traditional NLP Module}
+
+In this section, we give the details of feature engineering and learning algorithms.
+
+\subsubsection{Lexical Features}
+
+\begin{itemize}
+  \item {\bf Unigram Features} Unigram Features are designed to recognize distinguish words for the predicted categories. We represent each input news headline as one-hot representation where each dimension represent corresponding word term frequency. Since Chinese characters also make contributions to predict the truth categories, we use character level unigram features to enhance representations. Specifically, we represent the head lines on both word level and character level. The sentence is represented as a BOW(Bag of Word) which each word is weighted by its term frequency value.
+  \item {\bf Bigram Features} Unigram features only capture the keywords information, in order to contain the sequence information we adopt the bigram features. Sometimes the word groups(two adjust words) provide more benefits than only one word when explaining the meaning.  By this point, we extracted the bigram features of headlines.
+  \item {\bf Word Importance Features} We find that the same word contribution to different categories is not the same. Such as the word ``\textbf{宝宝}" is more likely appear in the category of \textbf{baby}. Thus we define the Word Importance Features as below:
+       \begin{equation}
+        W_{w_i-c_j} = \frac{Count_{ij}}{\sum_{k=1}^{18}Count_{ik}}
+       \end{equation}
+       where $Count_{ij}$ is the frequency value that the word $w_i$ appear in category $c_j$. We sum each word importance features $W_{wi}$ as the headlines features $W$(in this task, it has 18 dimensions).
+\end{itemize}
+
+\subsubsection{Word Embedding Features}
+
+\
+
+
+\noindent
+The unigram and bigram indicates the lexical features in the sentences. In order to better understand the headlines, we need some semantic information. Inspired by the work of \cite{mikolov2013distributed}, we represent each word in headlines as a vector also called word embedding. It built a semantic relationship between words which we thought that contains semantic information. Specifically, we train word embeddings based on our expanded headlines. And we use the average(\textbf{AVG}), maxim(\textbf{MAX}), and minim(\textbf{MIN}) pooling at each word embedding to get the headlines representation.
+
+
+\subsubsection{Learning Algorithms}
+
+\
+
+\noindent Due to the large scale of extracted features, we adopt Logistic Regression (LR) algorithm implemented by LIBLINEAR\footnote{\url{http://www.csie.ntu.edu.tw/~cjlin/liblinear/}} and XGBoost (XGB) algorithm\footnote{\url{https://github.com/dmlc/xgboost}} for classification.
+
+
+\subsection{Deep Learning Module}
+
+In this module, we adopt Recurrent convolutional neural network (RCNN) \cite{lai2015recurrent} for headlines classification. RCNN is effective to capture the contextual information and the most important features for category classification.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.75\columnwidth]{images/rcnn_2.eps}\\
+  \caption{RCNN}\label{fig:rcnn}
+\end{figure}
+
+{\bf Fig. \ref{fig:rcnn}} shows the network structure. The input of the network is a expanded headline sentence $S$, which is a sequence of words $w_1, w_2, \cdots, w_n$. The output of the network contains class category. We use $p(k | D, \theta)$ to denote the probability of the headline being category $k$, where $\theta$ is the parameters in the network.
+
+First, we use a bidirectional long short-term memory network to capture the contexts and combine a word and its context to present the word. The contexts help us to obtain a more precise word meaning. We define $c_l(w_i)$ as the left context of word $w_i$ and $c_r(w_i)$ as the right context of the word $w_i$, where $c_l(w_i)$ is the output of the forward LSTM and the backward LSTM respectively.  The representation of word $w_i$ is defined as the concatenation of the left-side context vector $c_l(w_i)$,
+the word embedding $e(w_i)$ and the right-side context vector $c_r(w_i)$:
+\begin{equation}
+x_i = [c_l(w_i);e(w_i);c_r(w_i)]
+\end{equation}
+
+Second, we apply a max-pooling layer after all of the representations of words are calculated:
+\begin{equation}
+y = max_{i=1}^nx_i
+\end{equation}
+where the max function is element-wise function. The pooling layer converts texts with various lengths into
+a fixed-length vector. With the pooling layer, we can capture the information throughout the entire text.
+
+Last, we use  an output layer to convert the output numbers into probabilities of each category. Similar to traditional neural networks, it is defined as
+\begin{equation}
+h = Wy + b
+\end{equation}
+\begin{equation}
+p = softmax(h)
+\end{equation}
+where $W$ is the weight matrix and the $b$ is the bias. The softmax function is to transform the output into a vector in the range $(0, 1]$ that add up to $1$.
+
+\subsection{Ensemble Module}
+
+To ensemble NLP-based models and DL-based models, we adopt {\em average strategy,} which means taking the mean of each individual model predictions. We sum up the following three probabilities to give the final predication:
+
+(1) LR algorithms with all NLP-based features;
+
+(2) XGB algorithms, using all NLP-based features;
+
+(3) the softmax probabilities in RCNN model;
+
+After that, we select the maximum summed probability as the final predicted category.
+
+\section{Experimental Settings}
+\label{sec:experiment}
+
+{\bf Datasets:} NLPCC 2017 Task 2 collected large-scale news headlines from several Chinese news websites, such as toutiao, sina. Each headline is annotated with a category, which indicates the topic of the news. In total, there are 18 categories, such as entertainment, sports, baby.
+
+To expand the news headlines, we search on Baidu and collected the top 5 related titles. We concatenate the origin headlines and the related titles as the expanded headlines. we segment the headlines using the python Chinese segmentation tool {\em jieba}. {\bf Table \ref{tab:dataset}} shows the statistics of the original and the expanded datasets.
+
+
+\begin{table}[ht]
+\centering
+    \caption{The statistics of the original and expanded datasets.}
+    \begin{tabular}{c|c|c|c|c|c}
+    \hline
+    \multirow{2}{*}{\textbf{Category}} & \multirow{2}{*}{\textbf{Size}} & \multicolumn{2}{c|}{\textbf{Original Headlines}} &
+    \multicolumn{2}{c}{\textbf{Expanded Headlines}} \\
+    \cline{3-6}
+                      & & \textbf{Avg. Chars} & \textbf{Avg. Words} & \textbf{Avg. Chars} & \textbf{Avg. Words}\\
+    \hline
+    train & 156,000 & 22.06 & 13.08 & 140.79 & 78.10\\
+    dev & 36,000 & 22.05 & 13.09 & 136.73 & 75.73 \\
+    test & 36,000 & 22.05 & 13.08 & 147.02 & 83.96  \\
+    \hline
+    \end{tabular}
+    \label{tab:dataset}
+\end{table}
+
+
+{\bf Evaluation:} We use the macro-averaged precision, recall and F1 to evaulate the performance. The macro-averaged precision is defined as follow:
+$$\text{Macro}_\text{avg} = \frac{1}{m}\sum_{i=1}^{m}p_i$$
+where $m$ denotes the number of class, in the case of this dataset is 18. $p_i$  is the accuracy of $i$th category.
+
+{\bf Pre-trained Word Embedding:} We find 41.0\% out-of-vocabulary words in the expanded headlines when using the given word embeddings. Thus we train word embeddings based on our expanded headlines, using fastText \cite{12}. We set the dimension of trained embedding to 100. And the embedding is used in Word Embedding Features, as well as the input to the RCNN model.
+
+{\bf Parameter Settings in RCNN:} We adopt Adam \cite{kingma2014adam} to optimize the cross entropy loss, and set the learning rate to 1e-3, hidden size to 100.
+
+{\bf Baselines:} The task organizers have implemented three DL baseline models, i.e., neural bag-of-words (NBoW), convolutional neural networks (CNN) \cite{kim2014convolutional} and long short-term memory network (LSTM) \cite{hochreiter1997long}. And we compare our models with these baseline models.
+
+
+\section{Results and Discussion}
+\label{sec:result}
+
+
+\begin{table}[ht]
+\centering
+    \caption{Our system performance (Micro-Acc) on the original and expanded datasets.}
+    \addtolength{\tabcolsep}{8pt}
+    \begin{tabular}{c|l|c|c}
+    \hline
+    \multicolumn{2}{c|}{\textbf{Model}} & \textbf{Original} & \textbf{Expanded} \\
+    \hline
+    \multirow{3}{*}{Baselines} & NBoW & 0.783 & - \\
+                               & CNN  & 0.763 & - \\
+                               & LSTM & 0.747 & - \\
+    \hline
+    \hline
+    \multirow{8}{*}{Logistic Regression(LR)}
+        & Unigram-Char & 0.7348 & 0.8140 \\
+        & Unigram-Word & 0.7772 & 0.8425 \\
+        & Bigram-Char & 0.7864 & 0.8578 \\
+        & Bigram-Word & 0.5805 & 0.8016 \\
+        & Word Importance& 0.7141 & 0.5876 \\
+        \cline{2-4}
+        & \tabincell{l}{Word Embeddding \\ (AVG)} & 0.7805 &  0.8453\\
+        & \tabincell{l}{Word Embeddding \\ (MIN/MAX/AVG)} & 0.7960 & 0.8535 \\
+        \cline{2-4}
+        & All Features & 0.8212 & 0.8741\\
+    \cline{1-4}
+    XGBoost(XGB) & All Features & 0.8192 & 0.8663\\
+    \hline
+    Deep Learning(DL) &RCNN & 0.8237 & 0.8751 \\
+    \hline
+    Ensemble & LR + XGB + DL & 0.8312 & {\bf 0.8871} \\
+    \hline
+    \end{tabular}
+    \label{tab:results}
+\end{table}
+
+
+
+{\bf Table \ref{tab:results}} lists the results of several baselines and our systems. We find:
+
+(1) Comparing different NLP features, Unigram-Word and Bigram-Char archives the better performance than the Unigram-Char and Bigram Features. We think that individual words alone can distinguish the category to classify. Also, we can grant the Bigram-Char as words in Chinese, since the Chinese words is usually constructed by two characters. What's more, the Word Embedding features achieve the better results than the Lexical Features since the word embedding can capture more semantic information. when combine all the features together, the performance increase to 0.8212, which indicates that all features make contributions.
+
+(2) Regarding deep learning models, the RCNN model surface the best the results of NLP methods. We think the RCNN model can capture the important information from word and context information, and when training with the large annotated training data, it surely archive the better results. Also, when comparing the baseline DL models, the RCNN model outperform the NBoW, CNN and LSTM models. We think that RCNN model can capture the most important information by the pooling comparing with the baseline models.
+
+(3) All ensemble methods significantly improved the performance. The ensemble of NLP methods and DL models (LR+XGB+DL) outperforms any single learning algorithm. It suggests that the traditional NLP methods and the deep learning models are complementary to each other and their combination achieves the best performance.
+
+(4) Surprisingly, the headlines expansion is very effective, which increase about 5\% comparing with the no-expanded sentences. It shows that our headlines expansion can bring in the extra knowledge which can supply the short origin headlines with more useful information.
+
+
+\section{Case Study}
+\label{sec:casestudy}
+We study two cases in our experiments that show the effectiveness and somewhere to be promoted. As shown in {\bf Table \ref{table:case1}}, \textrm{\{“和珅”与“皇上”再聚首\}} is an \textrm{entertainment} news headline. But it is classified to the wrong category \textbf{history} according to the word \textrm{皇上} and \textrm{和珅}. After we expand the headline, we obtain some related titles that contains the words \textrm{王刚}, \textrm{张铁林} and \textrm{娱乐八卦} and so on. Thus it is correctly classified to the \textbf{entertainment} category.
+
+Generally, it is easily expand some extra irrelevant information. As shown in {\bf Table \ref{table:case2}}, we expand the headline \textrm{\{如果穿整套的话，莫名就有一种呆萌喜感！\}}. We observe that the 4th expanded title \textrm{\{呆萌V!168 潮男\&191 双塔 刘国梁中网挑边太喜感 \_乒乓球\_新浪竞技...\}} contains some irrelevant information. Thus it is classified to the wrong category \textbf{sports}. From the overall experimental results, we can conclude that the benefit of expansion far greater than the harms it brings.
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+In this paper, we proposed a headlines expansion novel framework for short texts modeling and classification. Extra knowledge which help model to understand the news headlines is obtained by baidu search engine. Experimental results on NLPCC task2 validated the effectiveness of the proposed method. Future works can be focused on how to effectively use the extra knowledge.
+
+\begin{table}[ht]
+\renewcommand\arraystretch{1.5}
+\centering
+    \caption{Case Study I}
+    \begin{tabular}{l|l}
+    \hline
+    \bf Origin Headlines   & “和珅”与“皇上”再聚首 \\
+    \cline{1-2}
+    \bf Expanded Headlines & 1. 铁三角和珅皇上再聚首 王刚老成这样\_奢华\_维度女性网\\
+                           & 2. 和珅皇上再聚首 68岁的王刚老成这样\_13720网 \\
+                           & 3. 和珅与皇上再聚首!王刚与张铁林相聊甚欢\_网易娱乐 \\
+                           & 4. 和珅皇上再聚首 68 岁的王刚老成这样 张铁林相谈甚欢\_娱乐八卦\\
+                           & 5. “和珅”“皇上”再聚首!王刚与张铁林热聊- 新华网\\
+    \cline{1-2}
+    \bf Ground Truth &  \bf entertainment\\
+    \hline
+    \bf Origin Prediction & \color{red}{\bf history } \\
+    \hline
+    \bf Expanded Prediction & \color{blue}{\bf entertainment }\\
+    \hline
+    \end{tabular}\label{table:case1}
+    \vspace{0.2cm}
+
+    \caption{Case Study II}
+    \begin{tabular}{l|l}
+    \hline
+    \bf Origin Headlines   & 如果穿整套的话，莫名就有一种呆萌喜感！  \\
+    \cline{1-2}
+    \bf Expanded Headlines & 1. 看见这货就有莫名的喜感 - 糗事百科\\
+                           & 2. 大叔滑稽表演,莫名的喜感!【超级搞笑】-搞笑-高清视频-爱奇艺 \\
+                           & 3. 呆萌熊本熊原来这么会跳舞!整个画面充满着莫名喜感…\_微信网页版 \\
+                           & 4. 呆萌V!168潮男\&191双塔 刘国梁中网挑边太喜感 \_乒乓球\_新浪竞技...\\
+                           & 5. 【图片】看到这个小黑男嘉宾就想笑怎么破!这是由内而外的喜感!\\
+    \cline{1-2}
+    \bf Ground Truth &  \bf fashion\\
+    \hline
+    \bf Origin Prediction & \color{blue}{\bf fashion } \\
+    \hline
+    \bf Expanded Prediction & \color{red}{\bf sports }\\
+    \hline
+    \end{tabular}\label{table:case2}
+
+\end{table}
+
+\bibliography{emnlp2017}
+%\bibliographystyle{emnlpnatbib}
+
+\bibliographystyle{splncs}
+
+
+\end{CJK*}
+
+\end{document}
