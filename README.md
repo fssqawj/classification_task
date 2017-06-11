@@ -88,3 +88,10 @@ Next is a example of the Unigram Feature.
 - ./statistic.py 用于数据统计
 - ./test.py 将生成的prob变成json格式
 - ./test_super.py 将最后的结果进行ensemble，并输出
+
+
+## ./data
+
+数据集为NLPCC 2017 Shared Task2
+官方数据: https://github.com/FudanNLP/nlpcc2017_news_headline_categorization
+我们整理的数据: 百度云盘(176MB) http://pan.baidu.com/s/1nu8hUhb
