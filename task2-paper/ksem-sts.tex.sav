@@ -20,17 +20,16 @@
 \mainmatter  % start of an individual contribution
 
 % first the title is needed
-\title{Headline Expansion for Chinese News Headline Categorization}
+\title{An Examination of Headline Expansion on Chinese News Headline Categorization Task by Combining Traditional NLP-based models and Neural Networks}
 
 % a short form should be given in case it is too long for the running head
-\titlerunning{Headline Expansion for Chinese News Headline Categorization}
+\titlerunning{An Examination of Headline Expansion}
 
 
 \author{%Junfeng Tian \and 
 Maoquan Wang \and 
 Weijie An
-\thanks{Equal Contribution.}
-\and Qin Chen}
+\thanks{Equal Contribution.}}
 
 \authorrunning{Maoquan and Weijie}
 % (feature abused for this document to repeat the title also on left hand pages)
@@ -38,8 +37,7 @@ Weijie An
 % the affiliations are given next; don't give your e-mail address
 % unless you accept that it will be published
 \institute{East China Normal University\\
-\url{{51151201051}@stu.ecnu.edu.cn},
-\url{{wjan, qchen}@ica.stc.sh.cn}
+\url{{51151201051, 51151201022}@stu.ecnu.edu.cn}
 %\url{{51151201048, 51151201051, 51151201022}@stu.ecnu.edu.cn}
 }
 
@@ -54,12 +52,9 @@ The Chinese news headlines are usually short and confusing for eye-catching, whi
 
 \section{Introduction}
 
-% Chinese News Headline Categorization is to ¡£¡£¡£.
-Text classification is a foundational task in many NLP applications ~\cite{sriram2010short,aggarwal2012survey}. With the explosion of the social media, natural text (especially news) on the web is growing exponentially. It is urgent to categorize news headlines for different readers to choose their favourite news. However, it is impractical and extremely tedious to manually label a large number of headlines. NLPCC shared task provides {\em Task 2: News Headline Categorization }\cite{nlpcc2017task2} to  assesses the ability of participant systems to automatically classifier each headlines into one predefined categories.
+Chinese News Headline Categorization is to 
 
-
-
-%What's more, in the case of non-obvious phenomenons, humans can not make the right judgments. While machine learning techniques suits perfectly for this kind of tasks.
+Text classification is a foundational task in many NLP applications ~\cite{sriram2010short,aggarwal2012survey}. With the rise of Internet and social media, the text data on the web is growing exponentially. Chinese News Headlines classification is such a task that categorization of news titles into sub-categories for search engines, and classification of news articles by subject. It is impractical and extremely tedious to hand-label a sufficient number of headlines. What's more, in the case of non-obvious phenomenons, humans can not make the right judgments. While machine learning techniques suits perfectly for this kind of tasks.
 
 Various machine learning techniques especially deep learning methods has been widely used in text classification task. Kim~\cite{kim2014convolutional} introduced a convolution neural network for sentence classification, Lai \cite{lai2015recurrent} proposed Recurrent Convolutional Neural Networks(RCNN) to enhance contextual information of words, and Zhang~\cite{zhang2015character} explored character-level convolutional networks for text classification. These methods mainly focus on the labeled data, it is difficult to exploit the existing limited labeled data to achieve higher accuracy when face the unexplored instances. Chinese News headlines is very short and do not provide enough contextual information, the short-text classifier easily be blocked by sparsity and ambiguity problems~\cite{chen2011short}.
 
@@ -311,9 +306,9 @@ In this paper, we proposed a headlines expansion novel framework for short texts
     \cline{1-2}
     \bf Ground Truth &  \bf fashion\\
     \hline
-    \bf Origin Prediction & \color{red}{\bf fashion } \\
+    \bf Origin Prediction & \color{blue}{\bf fashion } \\
     \hline
-    \bf Expanded Prediction & \color{blue}{\bf sports }\\
+    \bf Expanded Prediction & \color{red}{\bf sports }\\
     \hline
     \end{tabular}\label{table:case2}
 

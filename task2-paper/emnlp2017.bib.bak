@@ -111,9 +111,5 @@ booktitle={Proceedings of NLPCC 2017}
   year={2013}
 }
 
-@article{bojanowski2016enriching,
-  title={Enriching Word Vectors with Subword Information},
-  author={Bojanowski, Piotr and Grave, Edouard and Joulin, Armand and Mikolov, Tomas},
-  journal={arXiv preprint arXiv:1607.04606},
-  year={2016}
-}
+
+
