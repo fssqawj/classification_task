@@ -26,8 +26,8 @@
 \titlerunning{Headline Expansion for Chinese News Headline Categorization}
 
 
-\author{%Junfeng Tian \and 
-Maoquan Wang \and 
+\author{%Junfeng Tian \and
+Maoquan Wang \and
 Weijie An
 \thanks{Equal Contribution.}
 \and Qin Chen}
@@ -83,9 +83,9 @@ The rest of this paper is organized as below: Section \ref{sec:model} describe t
 \end{figure}
 
 \begin{itemize}
-  \item {\bf Traditional NLP Module} is to extract two kinds of features. The lexical features are to select the category-related words, and the embedding features are to capture the semantic information. All these NLP-based features are used to build a classifier to make prediction.
+  \item {\bf Traditional NLP Module} is to extract two kinds of features. The lexical features are to select the category-related words, and the embedding features to capture the semantic information. All these NLP-based features are used to build classifier to make prediction.
   \item {\bf Deep Learning Module} is to encode input sentences into fixed-length vector and adopt softmax function to predict the probability of each category.
-  \item {\bf Ensemble Module} is to average each category's probability from the above two modules and makes the final decision.
+  \item {\bf Ensemble Module} is to average the probability of above two modules to get the final predicted category.
 \end{itemize}
 Next, we will describe the system in detail.
 
@@ -93,7 +93,7 @@ Next, we will describe the system in detail.
 \subsection{Headlines Expansion}
 \label{sec:expansion}
 
-The headlines of news are quite short and confused, and they need to be supplemented related knowledge to help reduce the ambiguity. We search on the largest Chinese search engine {\em Baidu.com} to obtain the top 5 related titles as the extra knowledge. We directly concatenate the origin headline and the expanded headlines as the input to the following models.
+The headlines of news are quite short and confused, thus it is helpful to supplement related knowledge to reduce the ambiguity. We first search on the largest Chinese search engine {\em Baidu.com} to obtain the top 5 related titles as the extra knowledge. Then we directly concatenate the origin headline and the expanded headlines as the input to the following models.
 
 
 \subsection{Traditional NLP Module}
@@ -103,8 +103,8 @@ In this section, we give the details of feature engineering and learning algorit
 \subsubsection{Lexical Features}
 
 \begin{itemize}
-  \item {\bf Unigram Features} Unigram Features are designed to recognize distinguish words for the predicted categories. We represent each input news headline as one-hot representation where each dimension represent corresponding word term frequency. Since Chinese characters also make contributions to predict the truth categories, we use character level unigram features to enhance representations. Specifically, we represent the head lines on both word level and character level. The sentence is represented as a BOW(Bag of Word) which each word is weighted by its term frequency value.
-  \item {\bf Bigram Features} Unigram features only capture the keywords information, in order to contain the sequence information we adopt the bigram features. Sometimes the word groups(two adjust words) provide more benefits than only one word when explaining the meaning.  By this point, we extracted the bigram features of headlines.
+  \item {\bf Unigram Features} Unigram Features are designed to recognize distinguish words for the predicted categories. We represent each input news headline as one-hot representation where each dimension represent corresponding word term frequency. Since Chinese characters also make contributions to predict the truth categories, we use character level unigram features to enhance representations. Specifically, we represent the head lines on both word level and character level. The sentence is represented as a BOW(Bag of Word), where each word is weighted by its term frequency value.
+  \item {\bf Bigram Features} Unigram features only capture the keywords information, in order to contain the sequence information we adopt the bigram features. Sometimes the word groups(two adjacent words) provide more benefits than only one word when explaining the meaning.  By this point, we extracted the bigram features of headlines.
   \item {\bf Word Importance Features} We find that the same word contribution to different categories is not the same. Such as the word ``\textbf{±¦±¦}" is more likely appear in the category of \textbf{baby}. Thus we define the Word Importance Features as below:
        \begin{equation}
         W_{w_i-c_j} = \frac{Count_{ij}}{\sum_{k=1}^{18}Count_{ik}}
@@ -125,22 +125,22 @@ The unigram and bigram indicates the lexical features in the sentences. In order
 
 \
 
-\noindent Due to the large scale number of extracted features, we adopt Logistic Regression (LR) implemented by LIBLINEAR\footnote{\url{http://www.csie.ntu.edu.tw/~cjlin/liblinear/}} and XGBoost (XGB)\footnote{\url{https://github.com/dmlc/xgboost}} due to large parameters and millions of examples.
+\noindent Due to the large scale of extracted features, we adopt Logistic Regression (LR) algorithm implemented by LIBLINEAR\footnote{\url{http://www.csie.ntu.edu.tw/~cjlin/liblinear/}} and XGBoost (XGB) algorithm\footnote{\url{https://github.com/dmlc/xgboost}} for classification.
 
 
 \subsection{Deep Learning Module}
 
-In this module, we adopt Recurrent Convolutional Neural Network (RCNN) \cite{lai2015recurrent} for headlines classification. RCNN is effective to capture the contextual information and the most important features for category classification.
+In this module, we adopt Recurrent convolutional neural network (RCNN) \cite{lai2015recurrent} for headlines classification. RCNN is effective to capture the contextual information and the most important features for category classification.
 
 \begin{figure}
   \centering
   \includegraphics[width=0.75\columnwidth]{images/rcnn_2.eps}\\
-  \caption{the illustration of Recurrent Convolutional Neural Network}\label{fig:rcnn}
+  \caption{RCNN}\label{fig:rcnn}
 \end{figure}
 
 {\bf Fig. \ref{fig:rcnn}} shows the network structure. The input of the network is a expanded headline sentence $S$, which is a sequence of words $w_1, w_2, \cdots, w_n$. The output of the network contains class category. We use $p(k | D, \theta)$ to denote the probability of the headline being category $k$, where $\theta$ is the parameters in the network.
 
-First, we use a bidirectional long short-term memory network to capture the contexts and combine a word and its context to present the word. The contexts help us to obtain a more precise word meaning. We define $c_l(w_i)$ as the left context of word $w_i$ and $c_r(w_i)$ as the right context of the word $w_i$, where $c_l(w_i)$ is the output of the forward LSTM and the backward LSTM respectively.  The representation of word $w_i$ is defined as the concatenation of the left-side context vector $c_l(w_i)$,
+First, we use a bidirectional long short-term memory network to capture the contexts information. Then we combine the word embedding and its context as the representation of the word. We define $c_l(w_i)$ as the left context of word $w_i$ and $c_r(w_i)$ as the right context of the word $w_i$, where $c_l(w_i)$ is the output of the forward LSTM and the backward LSTM respectively. The representation of word $w_i$ is defined as the concatenation of the left-side context vector $c_l(w_i)$,
 the word embedding $e(w_i)$ and the right-side context vector $c_r(w_i)$:
 \begin{equation}
 x_i = [c_l(w_i);e(w_i);c_r(w_i)]
@@ -151,16 +151,16 @@ Second, we apply a max-pooling layer after all of the representations of words a
 y = max_{i=1}^nx_i
 \end{equation}
 where the max function is element-wise function. The pooling layer converts texts with various lengths into
-a fixed-length vector. With the pooling layer, we can capture the information throughout the entire text.
+a fixed-length vector as the sentence representation. With the pooling layer, we can capture the information throughout the entire text.
 
-Last, we use  an output layer to convert the output numbers into probabilities of each category. Similar to traditional neural networks, it is defined as
+Finally, we use  an output layer to convert the sentence representation into probabilities of each category. Similar to traditional neural networks, it is defined as:
 \begin{equation}
 h = Wy + b
 \end{equation}
 \begin{equation}
 p = softmax(h)
 \end{equation}
-where $W$ is the weight matrix and the $b$ is the bias. The softmax function is to transform the output into a vector in the range $(0, 1]$ that add up to $1$.
+where $W$ is the weight matrix and the $b$ is the bias. The softmax function is to transform the output into a vector in the range $(0, 1]$ that adds up to $1$.
 
 \subsection{Ensemble Module}
 
